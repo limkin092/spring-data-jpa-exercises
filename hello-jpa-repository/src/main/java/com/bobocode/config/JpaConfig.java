@@ -1,9 +1,15 @@
 package com.bobocode.config;
 
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.Database;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 
@@ -17,24 +23,39 @@ import javax.sql.DataSource;
  * todo: 3. Configure {@link javax.persistence.EntityManagerFactory} bean with name "entityManagerFactory"
  * todo: 4. Enable JPA repository, set appropriate package using annotation property "basePackages"
  */
+
+@Configuration
+@EnableJpaRepositories(basePackages = "com.bobocode.dao")
 public class JpaConfig {
 
+    @Bean
     public DataSource dataSource() {
         return new EmbeddedDatabaseBuilder()
                 .setType(EmbeddedDatabaseType.H2)
                 .build();
     }
 
+    @Bean
     public JpaVendorAdapter jpaVendorAdapter() {
         // todo: create HibernateJpaVendorAdapter
+        HibernateJpaVendorAdapter jpaVendorAdapter = new HibernateJpaVendorAdapter();
         // todo: set H2 database
+        jpaVendorAdapter.setDatabase(Database.H2);
         // todo: enable DDL generation
-        throw new UnsupportedOperationException("Application won't start until you provide configs");
+        jpaVendorAdapter.setGenerateDdl(true);
+
+        return jpaVendorAdapter;
     }
 
+    @Bean("entityManagerFactory")
     public LocalContainerEntityManagerFactoryBean localContainerEMF() {
         // todo: create and configure required bean
+        LocalContainerEntityManagerFactoryBean emf = new LocalContainerEntityManagerFactoryBean();
+        emf.setDataSource(dataSource());
+        emf.setJpaVendorAdapter(jpaVendorAdapter());
         // todo: set package "com.bobocode.model" to scan for JPA entities
-        throw new UnsupportedOperationException("Application won't start until you provide configs");
+        emf.setPackagesToScan("com.bobocode.model");
+
+        return emf;
     }
 }

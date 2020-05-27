@@ -2,6 +2,11 @@ package com.bobocode.dao;
 
 import com.bobocode.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.util.List;
+import java.util.Optional;
 
 /**
  * This interface represents a data access object (DAO) for {@link User}.
@@ -13,6 +18,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * todo: 3. Create method that finds optional user by email fetching its address and roles using {@link org.springframework.data.jpa.repository.Query}
  * todo: 4. Add custom User repository interface
  */
-public interface UserRepository extends JpaRepository{
 
+public interface UserRepository extends JpaRepository<User,Long>, CustomUserRepository{
+
+    List<User> findAllByAddressCity(String city);
+
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.address LEFT JOIN FETCH u.roles WHERE u.email = :email" )
+    Optional<User> findUserByEmailFetchAndRolesAndAddress(@Param("email") String email);
 }
